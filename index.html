@@ -14,6 +14,7 @@
             align-items: center;
             min-height: 100vh;
             background-color: #87CEEB;
+            overflow: hidden;
         }
         #game-setup {
             padding: 10px;
@@ -28,7 +29,6 @@
             flex-direction: column;
             width: 100%;
             max-width: 600px;
-            height: 80vh;
         }
         #game-area {
             flex-grow: 1;
@@ -42,6 +42,10 @@
         #input-area {
             padding: 10px;
             background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
         }
         .balloon {
             position: absolute;
@@ -193,7 +197,7 @@
             <div id="slingshot"></div>
         </div>
         <div id="input-area">
-            <input type="number" id="answer" placeholder="답을 입력하세요" inputmode="numeric" pattern="[0-9]*">
+            <input type="number" id="answer" placeholder="답을 입력하세요" inputmode="decimal" pattern="\d*">
             <button id="pause-btn" onclick="togglePause()">일시정지</button>
             <div id="game-info">
                 <span id="score">점수: 0</span>
