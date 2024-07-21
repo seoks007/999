@@ -139,6 +139,9 @@
                 right: 10px;
                 max-width: none;
             }
+            #answer-input {
+                pointer-events: none;
+            }
         }
     </style>
 </head>
@@ -372,7 +375,7 @@
                 });
             }
             
-            if (timeLeft <= 0) {
+           if (timeLeft <= 0) {
                 clearInterval(gameInterval);
                 const name = document.getElementById('name-input').value.trim();
                 rankings.push({name: name, score: score});
@@ -416,7 +419,10 @@
         }
 
         function adjustMobileLayout() {
-            if (window.innerWidth <= 768) {
+            const isMobile = window.innerWidth <= 768;
+            const answerInput = document.getElementById('answer-input');
+            
+            if (isMobile) {
                 const gameScreen = document.getElementById('game-screen');
                 const gameBoard = document.getElementById('game-board');
                 const numpad = document.getElementById('numpad');
@@ -437,14 +443,18 @@
                 
                 // Rearrange elements for mobile layout
                 gameScreen.innerHTML = '';
-                gameScreen.appendChild(equationContainer);
                 gameScreen.appendChild(gameBoard);
+                gameScreen.appendChild(equationContainer);
                 gameScreen.appendChild(scoreElement);
                 gameScreen.appendChild(timerElement);
                 gameScreen.appendChild(numpad);
+
+                // Disable keyboard input for mobile
+                answerInput.readOnly = true;
             } else {
                 document.getElementById('numpad').style.display = 'none';
-                // Reset layout for desktop version if needed
+                // Enable keyboard input for desktop
+                answerInput.readOnly = false;
             }
         }
 
