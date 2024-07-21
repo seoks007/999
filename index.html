@@ -137,13 +137,25 @@
                 flex: 1;
                 margin: 0 0 10px 0;
                 max-width: 100%;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 5px;
             }
             .card {
-                font-size: 18px;
-                min-height: 60px;
-            }
-            #equation-container, #score-timer {
                 font-size: 16px;
+                min-height: 50px;
+            }
+            #equation-container {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            #equation-container > * {
+                margin: 5px;
+            }
+            #score-timer {
+                flex-direction: column;
+                align-items: center;
+            }
+            #score-timer > * {
                 margin: 5px 0;
             }
             #numpad {
@@ -373,14 +385,14 @@
             const gameBoard = document.getElementById('game-board');
             const cardElements = Array.from(gameBoard.children);
             cardElements.forEach((card, index) => {
-                card.dataset.number = cards[index];
+               card.dataset.number = cards[index];
                 if (uploadedImage) {
                     card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
                 }
             });
         }
 
-       function updateTimer() {
+        function updateTimer() {
             timeLeft--;
             document.getElementById('timer').textContent = `남은 시간: ${timeLeft}초`;
             
@@ -436,58 +448,64 @@
         }
 
         function adjustMobileLayout() {
-    const isMobile = window.innerWidth <= 768;
-    const answerInput = document.getElementById('answer-input');
-    const gameScreen = document.getElementById('game-screen');
-    const gameBoard = document.getElementById('game-board');
-    const numpad = document.getElementById('numpad');
-    const equationContainer = document.getElementById('equation-container');
-    const scoreTimer = document.getElementById('score-timer');
-    const praise = document.getElementById('praise');
-    const incorrectMessage = document.getElementById('incorrect-message');
-    const bonusTime = document.getElementById('bonus-time');
-    
-    if (isMobile) {
-        const screenHeight = window.innerHeight;
-        const numpadHeight = numpad.offsetHeight;
-        const availableHeight = screenHeight - numpadHeight - 20; // 20px for margins
-        
-        gameBoard.style.height = `${availableHeight * 0.6}px`;
-        gameScreen.style.height = `${availableHeight}px`;
-        
-        // Adjust numpad width to fit screen
-        numpad.style.width = `${window.innerWidth - 20}px`; // 20px for margins
-        numpad.style.display = 'grid';
-        
-        // Rearrange elements for mobile layout without clearing the game board
-        gameScreen.appendChild(gameBoard);
-        gameScreen.appendChild(equationContainer);
-        gameScreen.appendChild(scoreTimer);
-        gameScreen.appendChild(praise);
-        gameScreen.appendChild(incorrectMessage);
-        gameScreen.appendChild(bonusTime);
-        gameScreen.appendChild(numpad);
+            const isMobile = window.innerWidth <= 768;
+            const answerInput = document.getElementById('answer-input');
+            const gameScreen = document.getElementById('game-screen');
+            const gameBoard = document.getElementById('game-board');
+            const numpad = document.getElementById('numpad');
+            const equationContainer = document.getElementById('equation-container');
+            const scoreTimer = document.getElementById('score-timer');
+            const praise = document.getElementById('praise');
+            const incorrectMessage = document.getElementById('incorrect-message');
+            const bonusTime = document.getElementById('bonus-time');
+            
+            if (isMobile) {
+                const screenHeight = window.innerHeight;
+                const numpadHeight = 200; // 예상 numpad 높이
+                const availableHeight = screenHeight - numpadHeight;
+                
+                gameBoard.style.height = `${availableHeight * 0.6}px`;
+                gameScreen.style.height = `${availableHeight}px`;
+                
+                // Adjust numpad width to fit screen
+                numpad.style.width = `${window.innerWidth - 20}px`; // 20px for margins
+                numpad.style.display = 'grid';
+                
+                // Rearrange elements for mobile layout
+                gameScreen.style.display = 'flex';
+                gameScreen.style.flexDirection = 'column';
+                gameScreen.style.justifyContent = 'space-between';
+                
+                gameScreen.innerHTML = '';
+                gameScreen.appendChild(gameBoard);
+                gameScreen.appendChild(equationContainer);
+                gameScreen.appendChild(scoreTimer);
+                gameScreen.appendChild(praise);
+                gameScreen.appendChild(incorrectMessage);
+                gameScreen.appendChild(bonusTime);
+                gameScreen.appendChild(numpad);
 
-        // Disable keyboard input for mobile
-        answerInput.readOnly = true;
-    } else {
-        // Desktop layout
-        gameBoard.style.height = '';
-        gameScreen.style.height = '';
-        numpad.style.display = 'none';
-        
-        // Rearrange elements for desktop layout without clearing the game board
-        gameScreen.appendChild(gameBoard);
-        gameScreen.appendChild(equationContainer);
-        gameScreen.appendChild(scoreTimer);
-        gameScreen.appendChild(praise);
-        gameScreen.appendChild(incorrectMessage);
-        gameScreen.appendChild(bonusTime);
-        
-        // Enable keyboard input for desktop
-        answerInput.readOnly = false;
-    }
-}
+                // Disable keyboard input for mobile
+                answerInput.readOnly = true;
+            } else {
+                // Desktop layout
+                gameBoard.style.height = '';
+                gameScreen.style.height = '';
+                gameScreen.style.display = 'block';
+                numpad.style.display = 'none';
+                
+                gameScreen.innerHTML = '';
+                gameScreen.appendChild(gameBoard);
+                gameScreen.appendChild(equationContainer);
+                gameScreen.appendChild(scoreTimer);
+                gameScreen.appendChild(praise);
+                gameScreen.appendChild(incorrectMessage);
+                gameScreen.appendChild(bonusTime);
+                
+                // Enable keyboard input for desktop
+                answerInput.readOnly = false;
+            }
+        }
 
         document.getElementById('start-game').addEventListener('click', startGame);
         document.getElementById('submit-answer').addEventListener('click', checkAnswer);
