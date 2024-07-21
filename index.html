@@ -2,635 +2,444 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Íµ¨Íµ¨Îã® ÌíçÏÑ† Í≤åÏûÑ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>µ°º¿ ƒ´µÂ ∞‘¿”</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            text-align: center;
             margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #87CEEB;
-            overflow: hidden;
+            padding: 20px;
         }
-        #game-setup {
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
+        #setup, #game-screen {
             max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
         }
-        #game-container {
-            display: none;
-            flex-direction: column;
-            width: 100%;
-            max-width: 600px;
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px auto;
+            max-width: 400px;
         }
-        #game-area {
-            position: relative;
-            overflow: hidden;
-            background-image: url('https://img.freepik.com/free-photo/white-cloud-blue-sky_74190-7709.jpg');
+        .card {
+            aspect-ratio: 1;
+            background-color: #ddd;
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
             background-size: cover;
             background-position: center;
-            border: 1px solid black;
-            height: 70vh;
         }
-        #input-area {
-            padding: 10px;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        #custom-keyboard {
-            display: none;
-            flex-wrap: wrap;
-            width: 100%;
-            background-color: #ddd;
-            padding: 5px;
-            box-sizing: border-box;
-        }
-        .key {
-            flex: 1 0 21%;
-            margin: 3px;
-            padding: 10px;
-            text-align: center;
+        .card.flipped {
+            background-image: none !important;
             background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
         }
-        .balloon {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+        #equation-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.1s;
+            margin: 20px 0;
         }
-        .balloon span {
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 2px 4px;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 12px;
-            color: black;
-            box-shadow: 0 0 3px rgba(0,0,0,0.3);
+        #equation, #answer-input, #submit-answer, #toggle-music {
+            font-size: 24px;
+            margin: 0 5px;
         }
-        .event-balloon {
-            background-color: black;
-        }
-        .event-balloon span {
-            color: white;
-        }
-        #slingshot {
-            position: absolute;
-            right: -30px;
-            top: 50%;
-            width: 30px;
-            height: 30px;
-            background-image: url('https://www.pngmart.com/files/7/Slingshot-PNG-Pic.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-        }
-        .stone {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background-color: #333;
-            border-radius: 50%;
-        }
-        input, select, button {
-            font-size: 16px;
-            padding: 5px;
-            margin: 5px;
-        }
-        @keyframes firework {
-            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.5), 0 0 0 0 rgba(255, 0, 0, 0.5), 0 0 0 0 rgba(0, 255, 0, 0.5), 0 0 0 0 rgba(0, 0, 255, 0.5); }
-            100% { transform: scale(2); opacity: 0; box-shadow: -50px -50px 0 0 rgba(255, 165, 0, 0), 50px -50px 0 0 rgba(255, 0, 0, 0), -50px 50px 0 0 rgba(0, 255, 0, 0), 50px 50px 0 0 rgba(0, 0, 255, 0); }
-        }
-        @keyframes eventFirework {
-            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5); }
-            50% { transform: scale(1.5); opacity: 0.7; box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0.7); }
-            100% { transform: scale(2); opacity: 0; box-shadow: 0 0 40px 20px rgba(255, 255, 255, 0); }
-        }
-        @keyframes finalFirework {
-            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.5), 0 0 0 0 rgba(255, 0, 0, 0.5), 0 0 0 0 rgba(0, 255, 0, 0.5), 0 0 0 0 rgba(0, 0, 255, 0.5); }
-            50% { transform: scale(2.5); opacity: 0.7; box-shadow: -75px -75px 0 0 rgba(255, 165, 0, 0.7), 75px -75px 0 0 rgba(255, 0, 0, 0.7), -75px 75px 0 0 rgba(0, 255, 0, 0.7), 75px 75px 0 0 rgba(0, 0, 255, 0.7); }
-            100% { transform: scale(3); opacity: 0; box-shadow: -100px -100px 0 0 rgba(255, 165, 0, 0), 100px -100px 0 0 rgba(255, 0, 0, 0), -100px 100px 0 0 rgba(0, 255, 0, 0), 100px 100px 0 0 rgba(0, 0, 255, 0); }
-        }
-        .feedback {
-            position: absolute;
+        #praise, #bonus-message {
             font-size: 20px;
             font-weight: bold;
-            color: yellow;
-            text-shadow: 2px 2px 2px #000;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
+            margin: 10px 0;
+            color: red;
         }
-        .bonus-score {
-            position: absolute;
-            font-size: 16px;
+        #bonus-time {
+            color: red;
             font-weight: bold;
-            color: yellow;
-            animation: floatUp 1s forwards;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-30px); opacity: 0; }
-        }
-        #game-info {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        @keyframes flash {
-            0% { background-color: rgba(255, 0, 0, 0); }
-            50% { background-color: rgba(255, 0, 0, 0.3); }
-            100% { background-color: rgba(255, 0, 0, 0); }
-        }
-        .time-warning {
-            animation: flash 0.5s infinite;
-        }
-        #records {
             margin-top: 10px;
-            text-align: center;
         }
-        #top-records {
-            padding: 0;
-            list-style-type: none;
+        #numpad {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 20px auto;
         }
-        @media (max-width: 600px) {
-            #game-container {
-                height: 100vh;
-                max-width: none;
-            }
-            #game-area {
-                height: 80vh;
-            }
-            #input-area {
-                height: auto;
+        .numpad-btn {
+            font-size: 24px;
+            padding: 10px;
+        }
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .medal {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        #audio-permission {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            body {
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                height: 100vh;
             }
-            #custom-keyboard {
+            #game-screen {
                 display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+            #game-board {
+                flex: 6;
             }
         }
     </style>
 </head>
 <body>
-    <div id="game-setup">
-        <h1>Íµ¨Íµ¨Îã® ÌíçÏÑ† Í≤åÏûÑ</h1>
-        <input type="text" id="player-name" placeholder="Ïù¥Î¶ÑÏùÑ ÏûÖÎ†•ÌïòÏÑ∏Ïöî">
-        <select id="difficulty">
-            <option value="1">1Îã®Í≥Ñ (2~5Îã®)</option>
-            <option value="2">2Îã®Í≥Ñ (6~9Îã®)</option>
-            <option value="3">3Îã®Í≥Ñ (2~9Îã®)</option>
+    <div id="audio-permission" style="display:none;">
+        <p>¿Ã ∞‘¿”¿∫ πË∞Ê ¿Ωæ«¿ª ∆˜«‘«œ∞Ì ¿÷Ω¿¥œ¥Ÿ. ¿Ωæ«¿ª ƒ—Ω√∞⁄Ω¿¥œ±Ó?</p>
+        <button id="enable-audio">¿Ωæ« ƒ—±‚</button>
+    </div>
+
+    <div id="setup">
+        <h1>º˝¿⁄ ƒ´µÂ µ⁄¡˝±‚ ∞‘¿”</h1>
+        <input type="text" id="name-input" placeholder="¿Ã∏ß¿ª ¿‘∑¬«œººø‰">
+        <select id="level-select">
+            <option value="1">1¥‹∞Ë (1~9)</option>
+            <option value="2">2¥‹∞Ë (1~50)</option>
+            <option value="3">3¥‹∞Ë (11~99)</option>
         </select>
-        <select id="speed">
-            <option value="very-easy">ÏïÑÏ£º Ïâ¨ÏõÄ</option>
-            <option value="easy">Ïâ¨ÏõÄ</option>
-            <option value="medium">Ï§ëÍ∞Ñ</option>
-            <option value="hard">Ïñ¥Î†§ÏõÄ</option>
-            <option value="extreme">Í∑πÏïÖ</option>
-            <option value="hell">ÏßÄÏò•</option>
-        </select>
-        <input type="file" id="background-image" accept="image/*">
-        <button id="start-game-btn">Í≤åÏûÑ ÏãúÏûë</button>
-        <div id="records">
-            <h3>ÏµúÍ≥† Í∏∞Î°ù</h3>
-            <ol id="top-records"></ol>
+        <input type="file" id="image-upload" accept="image/*">
+        <button id="start-game">∞‘¿” Ω√¿€</button>
+        <div id="rankings">
+            <h2>º¯¿ß</h2>
+            <div id="ranking-list"></div>
+        </div>
+    </div>
+    <div id="game-screen" style="display:none;">
+        <div id="praise"></div>
+        <div id="bonus-message"></div>
+        <div id="game-board"></div>
+        <div id="equation-container">
+            <div id="equation"></div>
+            <input type="number" id="answer-input" placeholder="¥‰">
+            <button id="submit-answer">¡¶√‚</button>
+            <button id="toggle-music">¿Ωæ« ≤Ù±‚</button>
+        </div>
+        <div id="score">¡°ºˆ: 0</div>
+        <div id="timer">≥≤¿∫ Ω√∞£: 60√ </div>
+        <div id="bonus-time" style="display:none;">∫∏≥ Ω∫ ±∏∞£! (¡°ºˆ x2)</div>
+        <div id="numpad">
+            <button class="numpad-btn" onclick="appendToAnswer(1)">1</button>
+            <button class="numpad-btn" onclick="appendToAnswer(2)">2</button>
+            <button class="numpad-btn" onclick="appendToAnswer(3)">3</button>
+            <button class="numpad-btn" onclick="appendToAnswer(4)">4</button>
+            <button class="numpad-btn" onclick="appendToAnswer(5)">5</button>
+            <button class="numpad-btn" onclick="appendToAnswer(6)">6</button>
+            <button class="numpad-btn" onclick="appendToAnswer(7)">7</button>
+            <button class="numpad-btn" onclick="appendToAnswer(8)">8</button>
+            <button class="numpad-btn" onclick="appendToAnswer(9)">9</button>
+            <button class="numpad-btn" onclick="appendToAnswer(0)">0</button>
+            <button class="numpad-btn" onclick="checkAnswer()">Enter</button>
         </div>
     </div>
 
-    <div id="game-container">
-        <div id="game-area">
-            <div id="slingshot"></div>
-        </div>
-        <div id="input-area">
-            <input type="number" id="answer" placeholder="ÎãµÏùÑ ÏûÖÎ†•ÌïòÏÑ∏Ïöî" inputmode="numeric">
-            <button id="pause-btn">ÏùºÏãúÏ†ïÏßÄ</button>
-            <div id="game-info">
-                <span id="score">Ï†êÏàò: 0</span>
-                <span id="time">ÏãúÍ∞Ñ: 60Ï¥à</span>
-            </div>
-        </div>
-        <div id="custom-keyboard">
-            <div class="key" onclick="enterDigit(1)">1</div>
-            <div class="key" onclick="enterDigit(2)">2</div>
-            <div class="key" onclick="enterDigit(3)">3</div>
-            <div class="key" onclick="enterDigit(4)">4</div>
-            <div class="key" onclick="enterDigit(5)">5</div>
-            <div class="key" onclick="enterDigit(6)">6</div>
-            <div class="key" onclick="enterDigit(7)">7</div>
-            <div class="key" onclick="enterDigit(8)">8</div>
-            <div class="key" onclick="enterDigit(9)">9</div>
-            <div class="key" onclick="enterDigit(0)">0</div>
-            <div class="key" onclick="submitAnswer()">ÏûÖÎ†•</div>
-            <div class="key" onclick="clearAnswer()">ÏßÄÏö∞Í∏∞</div>
-        </div>
-    </div>
-
-    <audio id="pop-sound" src="https://www.soundjay.com/misc/sounds/balloon-popping-1.mp3"></audio>
-    <audio id="event-pop-sound" src="https://www.soundjay.com/misc/sounds/balloon-popping-2.mp3"></audio>
-    <audio id="cheer-sound" src="https://www.soundjay.com/human/sounds/applause-01.mp3"></audio>
+    <audio id="applause-sound" src="https://www.soundjay.com/human/applause-01.mp3"></audio>
+    <audio id="cheer-sound" src="https://www.soundjay.com/human/cheering-3.mp3"></audio>
+    <audio id="background-music" loop></audio>
 
     <script>
-        let gameInterval;
-        let currentProblems = [];
+        let cards = [];
+        let selectedCards = [];
         let score = 0;
-        let startTime;
-        let timerInterval;
-        let records = [];
-        let isGameRunning = false;
-        let isPaused = false;
-        let balloonCount = 0;
-        let currentFeedback = null;
-        let missedBalloons = 0;
-        let isLastTenSeconds = false;
-        const gameArea = document.getElementById('game-area');
-        const gameSetup = document.getElementById('game-setup');
-        const gameContainer = document.getElementById('game-container');
-        const customKeyboard = document.getElementById('custom-keyboard');
+        let timeLeft = 60;
+        let gameInterval;
+        let rankings = [];
+        let currentLevel = 1;
+        let consecutiveCorrect = 0;
+        let bonusTime = false;
+        let uploadedImage = null;
+        let audioEnabled = false;
+
+        const praises = [
+            "»«∏¢«ÿø‰!", "¥Î¥‹«ÿø‰!", "∏⁄¡Æø‰!", "øœ∫Æ«ÿø‰!", "≥Ó∂Ûøˆø‰!",
+            "√µ¿ÁΩ√≥◊ø‰!", "√÷∞Ìøπø‰!", "¥Îπ⁄¿Ãø°ø‰!", "πœ¿ª ºˆ æ¯æÓø‰!", "»ØªÛ¿˚¿Ãø°ø‰!",
+            "±≤¿Â«ÿø‰!", "∂ŸæÓ≥™ø‰!", "±‚∞° ∏∑«Ùø‰!", "¥Î¥‹«— Ω«∑¬¿Ãø°ø‰!", "øÕøÏ!",
+            "≥°≥ª¡÷¥¬µ•ø‰?", "¥ÁΩ≈¿∫ √µ¿Á!", "≥Ó∂ÛøÓ Ω«∑¬¿Ãø°ø‰!", "¥Î¥‹«— µŒ≥˙øπø‰!", "π⁄ºˆ √ƒ µÂ∑¡ø‰!"
+        ];
+
+        const backgroundMusicLinks = [
+            "https://drive.google.com/uc?export=download&id=1QyYnSoyddG7wBrEYZl1BoKS7MO5HaKJK",
+            "https://drive.google.com/uc?export=download&id=1lSLscRfnvcvSCTXlXun9zbGeHBPf28_d",
+            "https://drive.google.com/uc?export=download&id=1gDtXKox-KRBjR61zbELRmFqbsk5qD8OK",
+            "https://drive.google.com/uc?export=download&id=14RToKdmhNe9Bd7TFlzHiJpuDaBzNL2c9",
+            "https://drive.google.com/uc?export=download&id=1hyLZhL5n-x51ZZ0GTYHE0dkE75fBG8Qr"
+        ];
+
+        let applauseSound = document.getElementById('applause-sound');
+        let cheerSound = document.getElementById('cheer-sound');
+        let backgroundMusic = document.getElementById('background-music');
+
+        function playRandomBackgroundMusic() {
+            if (!audioEnabled) return;
+
+            const randomIndex = Math.floor(Math.random() * backgroundMusicLinks.length);
+            backgroundMusic.src = backgroundMusicLinks[randomIndex];
+            backgroundMusic.play().catch(e => console.log("Audio play failed:", e));
+        }
 
         function startGame() {
-            if (isGameRunning) return;
-            const playerName = document.getElementById('player-name').value;
-            if (!playerName) {
-                alert("Ïù¥Î¶ÑÏùÑ ÏûÖÎ†•Ìï¥Ï£ºÏÑ∏Ïöî!");
+            const name = document.getElementById('name-input').value.trim();
+            if (!name) {
+                alert('¿Ã∏ß¿ª ¿‘∑¬«ÿ¡÷ººø‰.');
                 return;
             }
-            isGameRunning = true;
-            isPaused = false;
-            isLastTenSeconds = false;
-            resetGame();
-            gameSetup.style.display = 'none';
-            gameContainer.style.display = 'flex';
-            if (isMobile()) {
-                customKeyboard.style.display = 'flex';
-                window.scrollTo(0, 0);
-            }
 
-            const speed = document.getElementById('speed').value;
-            let intervalTime = 2000;
-            if (speed === 'easy') intervalTime = 1000;
-            else if (speed === 'medium') intervalTime = 1000;
-            else if (speed === 'hard') intervalTime = 1000;
-            else if (speed === 'extreme') intervalTime = 700;
-            else if (speed === 'hell') intervalTime = 666;
-
-            gameInterval = setInterval(createBalloon, intervalTime);
-            timerInterval = setInterval(updateTime, 1000);
-            startTime = Date.now();
-        }
-
-        function resetGame() {
-            clearInterval(gameInterval);
-            clearInterval(timerInterval);
-            document.getElementById('game-area').innerHTML = '<div id="slingshot"></div>';
-            currentProblems = [];
+            currentLevel = parseInt(document.getElementById('level-select').value);
+            cards = [];
+            selectedCards = [];
             score = 0;
-            balloonCount = 0;
-            missedBalloons = 0;
-            updateScore(0);
-            document.getElementById('time').textContent = 'ÏãúÍ∞Ñ: 60Ï¥à';
-            gameArea.classList.remove('time-warning');
+            consecutiveCorrect = 0;
+            timeLeft = 60;
+            bonusTime = false;
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = '';
+            document.getElementById('score').textContent = '¡°ºˆ: 0';
+            document.getElementById('timer').textContent = '≥≤¿∫ Ω√∞£: 60√ ';
+            document.getElementById('answer-input').value = '';
+            document.getElementById('equation').textContent = '';
+            document.getElementById('praise').textContent = '';
+            document.getElementById('bonus-message').textContent = '';
+            document.getElementById('bonus-time').style.display = 'none';
+
+            let min, max;
+            switch (currentLevel) {
+                case 1: min = 1; max = 9; break;
+                case 2: min = 1; max = 50; break;
+                case 3: min = 11; max = 99; break;
+            }
+
+            for (let i = 0; i < 20; i++) {
+                let randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+                cards.push(randomNum);
+            }
+
+            shuffleArray(cards);
+
+            cards.forEach((number, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.number = number;
+                if (uploadedImage) {
+                    card.style.backgroundImage = `url(${uploadedImage})`;
+                    card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
+                    card.style.backgroundSize = '400% 500%';
+                }
+                card.addEventListener('click', () => flipCard(card, index));
+                gameBoard.appendChild(card);
+            });
+
+            clearInterval(gameInterval);
+            gameInterval = setInterval(updateTimer, 1000);
+
+            if (audioEnabled) {
+                playRandomBackgroundMusic();
+            }
         }
 
-        function createBalloon() {
-            if (isPaused) return;
-            const balloon = document.createElement('div');
-            balloon.className = 'balloon';
+        function flipCard(card, index) {
+            if (selectedCards.length < 2 && !selectedCards.includes(index) && !card.classList.contains('flipped')) {
+                card.textContent = card.dataset.number;
+                card.classList.add('flipped');
+                selectedCards.push(index);
 
-            const difficulty = document.getElementById('difficulty').value;
-            const speed = document.getElementById('speed').value;
-            let num1, num2;
-
-            if (difficulty === '1') {
-                num1 = Math.floor(Math.random() * 4) + 2;
-                num2 = Math.floor(Math.random() * 9) + 1;
-            } else if (difficulty === '2') {
-                num1 = Math.floor(Math.random() * 4) + 6;
-                num2 = Math.floor(Math.random() * 9) + 1;
-            } else {
-                num1 = Math.floor(Math.random() * 8) + 2;
-                num2 = Math.floor(Math.random() * 9) + 1;
-            }
-
-            let isEventBalloon = false;
-            let eventScore;
-            balloonCount++;
-            let balloonFactor = 1;
-            if (speed === 'extreme') {
-                balloonFactor = 1.3;
-            } else if (speed === 'hell') {
-                balloonFactor = 1.5;
-            }
-
-            if (balloonCount % Math.floor(4 / balloonFactor) === 0) {
-                isEventBalloon = true;
-                eventScore = difficulty === '3' ? Math.floor(Math.random() * 6) + 5 : Math.floor(Math.random() * 5) + 3;
-                balloon.classList.add('event-balloon');
-            }
-
-            const problem = { 
-                num1, 
-                num2, 
-                result: num1 * num2, 
-                element: balloon, 
-                isEvent: isEventBalloon, 
-                eventScore: eventScore,
-                baseScore: difficulty === '3' ? 4 : 2
-            };
-            currentProblems.push(problem);
-            balloon.innerHTML = `<span>${num1} x ${num2}</span>`;
-
-            if (!isEventBalloon) {
-                const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FDCB6E', '#6C5CE7', '#55E6C1'];
-                const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                balloon.style.backgroundColor = randomColor;
-            }
-
-            let position = getRandomPosition();
-            balloon.style.left = `${position.x}px`;
-            balloon.style.top = '-50px';
-            gameArea.appendChild(balloon);
-
-            let fall = setInterval(() => {
-                if (!isGameRunning || isPaused) return;
-                let top = parseInt(balloon.style.top);
-                if (top >= gameArea.clientHeight - 50) {
-                    clearInterval(fall);
-                    balloon.remove();
-                    currentProblems = currentProblems.filter(p => p.element !== balloon);
-                    missedBalloons++;
-                } else {
-                    let increment = 1;
-                    switch (speed) {
-                        case 'very-easy': increment = 1; break;
-                        case 'easy': increment = 2; break;
-                        case 'medium': increment = 3; break;
-                        case 'hard': increment = 4; break;
-                        case 'extreme': increment = 5; break;
-                        case 'hell': increment = 6; break;
-                    }
-                    balloon.style.top = `${top + increment}px`;
+                if (selectedCards.length === 2) {
+                    updateEquation();
+                    document.getElementById('answer-input').focus();
                 }
-            }, difficulty === '3' ? 25 : 50);
+            }
         }
 
-        function getRandomPosition() {
-            const gameWidth = gameArea.clientWidth;
-            const gameHeight = gameArea.clientHeight;
-            let x, y;
-            let overlap;
-            do {
-                overlap = false;
-                x = Math.random() * (gameWidth - 50);
-                y = Math.random() * (gameHeight - 50);
-                for (let problem of currentProblems) {
-                    let rect1 = {x: x, y: y, width: 50, height: 50};
-                    let rect2 = problem.element.getBoundingClientRect();
-                    if (rect1.x < rect2.x + rect2.width &&
-                        rect1.x + rect1.width > rect2.x &&
-                        rect1.y < rect2.y + rect2.height &&
-                        rect1.y + rect1.height > rect2.y) {
-                        overlap = true;
-                        break;
-                    }
-                }
-            } while (overlap);
-            return {x, y};
+        function updateEquation() {
+            const card1 = document.getElementsByClassName('card')[selectedCards[0]];
+            const card2 = document.getElementsByClassName('card')[selectedCards[1]];
+            const num1 = parseInt(card1.dataset.number);
+            const num2 = parseInt(card2.dataset.number);
+            document.getElementById('equation').textContent = `${num1} + ${num2} = `;
         }
 
         function checkAnswer() {
-            if (!isGameRunning || isPaused) return;
-            const userAnswer = parseInt(document.getElementById('answer').value);
-            const correctProblem = currentProblems.find(p => p.result === userAnswer);
-            if (correctProblem) {
-                let points = correctProblem.isEvent ? correctProblem.eventScore : correctProblem.baseScore;
-                updateScore(points);
-                shootStone(correctProblem.element);
-                currentProblems = currentProblems.filter(p => p !== correctProblem);
-                showFeedback(points);
-            }
-            document.getElementById('answer').value = '';
-        }
+            if (selectedCards.length !== 2) return;
 
-        function shootStone(target) {
-            const stone = document.createElement('div');
-            stone.className = 'stone';
-            stone.style.right = '0px';
-            stone.style.top = '50%';
-            gameArea.appendChild(stone);
+            const card1 = document.getElementsByClassName('card')[selectedCards[0]];
+            const card2 = document.getElementsByClassName('card')[selectedCards[1]];
+            const userAnswer = parseInt(document.getElementById('answer-input').value);
+            const correctSum = parseInt(card1.dataset.number) + parseInt(card2.dataset.number);
 
-            const targetRect = target.getBoundingClientRect();
-            const gameAreaRect = gameArea.getBoundingClientRect();
-            const targetX = targetRect.left - gameAreaRect.left + targetRect.width / 2;
-            const targetY = targetRect.top - gameAreaRect.top + targetRect.height / 2;
+            if (userAnswer === correctSum) {
+                consecutiveCorrect++;
+                let pointsEarned = bonusTime ? 2 : 1;
+                score += pointsEarned;
 
-            const animation = stone.animate([
-                { right: '0px', top: '50%' },
-                { right: `${gameAreaRect.width - targetX}px`, top: `${targetY}px` }
-            ], {
-                duration: 300,
-                easing: 'ease-out'
-            });
+                const praise = praises[Math.floor(Math.random() * praises.length)];
+                document.getElementById('praise').textContent = `${praise} +${pointsEarned}¡°`;
 
-            animation.onfinish = () => {
-                stone.remove();
-                popBalloon(target);
-            };
-        }
-
-        function popBalloon(target) {
-            if (isLastTenSeconds) {
-                target.style.animation = 'finalFirework 0.8s forwards';
-            } else if (target.classList.contains('event-balloon')) {
-                target.style.animation = 'eventFirework 0.5s forwards';
-            } else {
-                target.style.animation = 'firework 0.5s forwards';
-            }
-            playSound(target.classList.contains('event-balloon') ? 'event-pop-sound' : 'pop-sound');
-            setTimeout(() => {
-                target.remove();
-            }, 800);
-        }
-
-        function updateScore(points) {
-            const prevScore = score;
-            score += points;
-            document.getElementById('score').textContent = `Ï†êÏàò: ${score}`;
-            if (Math.floor(prevScore / 10) < Math.floor(score / 10)) {
-                playSound('cheer-sound');
-            }
-        }
-
-        function updateTime() {
-            if (!isPaused) {
-                const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-                const remainingTime = Math.max(0, 60 - elapsedTime);
-                document.getElementById('time').textContent = `ÏãúÍ∞Ñ: ${remainingTime}Ï¥à`;
-                if (remainingTime <= 10 && !isLastTenSeconds) {
-                    isLastTenSeconds = true;
-                    gameArea.classList.add('time-warning');
+                if (consecutiveCorrect % 2 === 0) {
+                    const bonus = consecutiveCorrect;
+                    score += bonus;
+                    document.getElementById('bonus-message').textContent = `ø¨º” ¡§¥‰ ${consecutiveCorrect}»∏ +${bonus}¡°`;
+                } else {
+                    document.getElementById('bonus-message').textContent = '';
                 }
-                if (remainingTime === 0) {
-                    endGame();
-                }
-            }
-        }
 
-        function endGame() {
-            isGameRunning = false;
-            clearInterval(gameInterval);
-            clearInterval(timerInterval);
-            const playerName = document.getElementById('player-name').value;
-            let finalScore = score;
-            if (missedBalloons === 0) {
-                finalScore *= 2;
-            }
-            alert(`Í≤åÏûÑ Ï¢ÖÎ£å! ${playerName}ÎãòÏùò ÏµúÏ¢Ö Ï†êÏàò: ${finalScore}`);
-            updateRecords(playerName, finalScore);
-            resetGame();
-            gameSetup.style.display = 'flex';
-            gameContainer.style.display = 'none';
-            customKeyboard.style.display = 'none';
-        }
-
-        function updateRecords(playerName, finalScore) {
-            records.push({name: playerName, score: finalScore});
-            records.sort((a, b) => b.score - a.score);
-            records = records.slice(0, 3);
-            saveRecords();
-            updateRecordsDisplay();
-        }
-
-        function saveRecords() {
-            localStorage.setItem('gugudan_records', JSON.stringify(records));
-        }
-
-        function updateRecordsDisplay() {
-            const topRecords = document.getElementById('top-records');
-            topRecords.innerHTML = '';
-            const medals = ['ü•á', 'ü•à', 'ü•â'];
-            records.forEach((record, index) => {
-                const li = document.createElement('li');
-                li.textContent = `${medals[index]} ${record.name}: ${record.score}Ï†ê`;
-                topRecords.appendChild(li);
-            });
-        }
-
-        function togglePause() {
-            isPaused = !isPaused;
-            const pauseBtn = document.getElementById('pause-btn');
-            pauseBtn.textContent = isPaused ? "Í≥ÑÏÜçÌïòÍ∏∞" : "ÏùºÏãúÏ†ïÏßÄ";
-        }
-
-        function showFeedback(points) {
-            if (currentFeedback) {
-                currentFeedback.remove();
-            }
-            const feedbacks = [
-                "Î©ãÏ†∏!", "ÎåÄÎ∞ï!", "ÌõåÎ•≠Ìï¥!", "Ï≤úÏû¨!", "ÏôÑÎ≤ΩÌï¥!",
-                "ÎåÄÎã®Ìï¥!", "ÍµâÏû•Ìï¥!", "ÎÜÄÎùºÏõå!", "ÎÅùÎÇ¥Ï§ò!", "ÏµúÍ≥†Ïïº!",
-                "ÏôÄÏö∞!", "ÎØøÏùÑ Ïàò ÏóÜÏñ¥!", "Íµø!", "ÌôòÏÉÅÏ†Å!"
-            ];
-            const feedback = document.createElement('div');
-            feedback.className = 'feedback';
-            feedback.textContent = `${feedbacks[Math.floor(Math.random() * feedbacks.length)]} +${points}Ï†ê!`;
-            gameArea.appendChild(feedback);
-            currentFeedback = feedback;
-            setTimeout(() => {
-                if (currentFeedback === feedback) {
-                    currentFeedback.remove();
-                    currentFeedback = null;
-                }
-            }, 1000);
-        }
-
-        function playSound(id) {
-            const sound = document.getElementById(id);
-            if (sound) {
-                sound.currentTime = 0;
-                sound.play().catch(e => console.error("Error playing sound:", e));
-            }
-        }
-
-        function enterDigit(digit) {
-            const answerField = document.getElementById('answer');
-            answerField.value += digit;
-        }
-
-        function submitAnswer() {
-            checkAnswer();
-        }
-
-        function clearAnswer() {
-            document.getElementById('answer').value = '';
-        }
-
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        function resizeGameArea() {
-            if (isMobile()) {
-                const vh = window.innerHeight * 0.01;
-                document.documentElement.style.setProperty('--vh', `${vh}px`);
-                gameArea.style.height = `calc(var(--vh, 1vh) * 80)`;
-                gameContainer.style.height = `calc(var(--vh, 1vh) * 100)`;
-            } else {
-                gameArea.style.height = '80vh';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const startGameBtn = document.getElementById('start-game-btn');
-            startGameBtn.addEventListener('click', startGame);
-
-            const pauseBtn = document.getElementById('pause-btn');
-            pauseBtn.addEventListener('click', togglePause);
-
-            document.getElementById('answer').addEventListener('keyup', function(event) {
-                if (event.key === 'Enter') {
-                    checkAnswer();
-                }
-            });
-
-            document.getElementById('background-image').addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        gameArea.style.backgroundImage = `url('${e.target.result}')`;
+                if (score % 10 === 0) {
+                    if (score % 20 === 0) {
+                        cheerSound.play().catch(e => console.log("Audio play failed:", e));
+                    } else {
+                        applauseSound.play().catch(e => console.log("Audio play failed:", e));
                     }
-                    reader.readAsDataURL(file);
+                }
+            } else {
+                score = Math.max(0, score - 1);
+                consecutiveCorrect = 0;
+                document.getElementById('praise').textContent = '∆≤∑»æÓø‰. -1¡°';
+                document.getElementById('bonus-message').textContent = '';
+            }
+
+            document.getElementById('score').textContent = `¡°ºˆ: ${score}`;
+            document.getElementById('answer-input').value = '';
+
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+            card1.textContent = '';
+            card2.textContent = '';
+
+            selectedCards = [];
+            shuffleArray(cards);
+            updateCardPositions();
+        }
+
+        function updateCardPositions() {
+            const gameBoard = document.getElementById('game-board');
+            const cardElements = Array.from(gameBoard.children);
+            cardElements.forEach((card, index) => {
+                card.dataset.number = cards[index];
+                if (uploadedImage) {
+                    card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
                 }
             });
+        }
 
-            window.addEventListener('resize', resizeGameArea);
-            window.addEventListener('orientationchange', resizeGameArea);
-
-            const savedRecords = localStorage.getItem('gugudan_records');
-            if (savedRecords) {
-                records = JSON.parse(savedRecords);
-                updateRecordsDisplay();
+        function updateTimer() {
+            timeLeft--;
+            document.getElementById('timer').textContent = `≥≤¿∫ Ω√∞£: ${timeLeft}√ `;
+            
+            if (timeLeft === 10) {
+                bonusTime = true;
+                document.getElementById('bonus-time').style.display = 'block';
+                document.querySelectorAll('.card:not(.flipped)').forEach(card => {
+                    card.style.backgroundColor = 'red';
+                });
             }
-            resizeGameArea();
+            
+            if (timeLeft <= 0) {
+                clearInterval(gameInterval);
+                backgroundMusic.pause();
+                const name = document.getElementById('name-input').value.trim();
+                rankings.push({name: name, score: score});
+                rankings.sort((a, b) => b.score - a.score);
+                rankings = rankings.slice(0, 3);
+                updateRankings();
+                alert(`∞‘¿” ¡æ∑·! √÷¡æ ¡°ºˆ: ${score}`);
+                document.getElementById('setup').style.display = 'block';
+                document.getElementById('game-screen').style.display = 'none';
+            }
+        }
+
+        function updateRankings() {
+            const rankingList = document.getElementById('ranking-list');
+            rankingList.innerHTML = '';
+            const medals = ['??', '??', '??'];
+            rankings.forEach((player, index) => {
+                const rankingItem = document.createElement('div');
+                rankingItem.className = 'ranking-item';
+                rankingItem.innerHTML = `
+                    <span class="medal">${medals[index] || ''}</span>
+                    <span>${player.name}: ${player.score}¡°</span>
+                `;
+                rankingList.appendChild(rankingItem);
+            });
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function appendToAnswer(num) {
+            document.getElementById('answer-input').value += num;
+        }
+
+        document.getElementById('start-game').addEventListener('click', function() {
+            document.getElementById('audio-permission').style.display = 'none';
+            startGame();
+        });
+
+        document.getElementById('submit-answer').addEventListener('click', checkAnswer);
+        document.getElementById('answer-input').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        document.getElementById('image-upload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('enable-audio').addEventListener('click', function() {
+            audioEnabled = true;
+            this.textContent = '¿Ωæ«¿Ã ƒ—¡≥Ω¿¥œ¥Ÿ';
+            this.disabled = true;
+            playRandomBackgroundMusic();
+        });
+
+        document.getElementById('toggle-music').addEventListener('click', function() {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play().catch(e => console.log("Audio play failed:", e));
+                this.textContent = '¿Ωæ« ≤Ù±‚';
+            } else {
+                backgroundMusic.pause();
+                this.textContent = '¿Ωæ« ƒ—±‚';
+            }
+        });
+
+        // ∆‰¿Ã¡ˆ ∑ŒµÂ Ω√ ø¿µø¿ ±««— ø‰√ª «•Ω√
+        window.addEventListener('load', function() {
+            document.getElementById('audio-permission').style.display = 'block';
         });
     </script>
 </body>
