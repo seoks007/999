@@ -64,7 +64,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 20px 0 10px;
+            margin: 10px 0;
         }
         #equation, #answer-input, #submit-answer {
             font-size: 18px;
@@ -96,8 +96,8 @@
             margin: 10px auto;
         }
         .numpad-btn {
-            font-size: 24px;
-            padding: 15px;
+            font-size: 18px;
+            padding: 10px;
             width: 100%;
         }
         .ranking-item {
@@ -129,45 +129,33 @@
             #game-screen {
                 display: flex;
                 flex-direction: column;
-                height: 100vh;
+                height: 100%;
                 margin: 0;
                 padding: 10px;
             }
             #game-board {
                 flex: 1;
-                margin: 0 0 15px 0;
+                margin: 0 0 10px 0;
                 max-width: 100%;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 3px;
             }
             .card {
-                font-size: 14px;
-                min-height: 35px;
+                font-size: 16px;
+                min-height: 45px;
             }
-            #equation-container {
-                flex-wrap: wrap;
-                justify-content: center;
-                margin: 15px 0;
-            }
-            #equation-container > * {
-                margin: 5px;
-            }
-            #answer-input {
-                pointer-events: none;
+            #equation-container, #score-timer {
+                font-size: 16px;
+                margin: 5px 0;
             }
             #numpad {
                 display: grid;
                 position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
                 max-width: none;
-                margin: 0;
-                padding: 5px;
             }
-            .numpad-btn {
-                font-size: 24px;
-                padding: 15px 0;
+            #answer-input {
+                pointer-events: none;
             }
         }
     </style>
@@ -266,7 +254,7 @@
             timeLeft = 60;
             bonusTime = false;
             document.getElementById('setup').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'flex';
+            document.getElementById('game-screen').style.display = 'block';
             const gameBoard = document.getElementById('game-board');
             gameBoard.innerHTML = '';
             document.getElementById('score').textContent = '점수: 0';
@@ -457,27 +445,30 @@
             const scoreTimer = document.getElementById('score-timer');
             
             if (isMobile) {
-                gameScreen.style.height = '100vh';
-                gameScreen.style.display = 'flex';
-                gameScreen.style.flexDirection = 'column';
-                gameScreen.style.justifyContent = 'space-between';
+                const screenHeight = window.innerHeight;
+                const numpadHeight = numpad.offsetHeight;
+                const availableHeight = screenHeight - numpadHeight - 20; // 20px for margins
                 
-                gameBoard.style.flex = '1';
+                gameBoard.style.height = `${availableHeight * 0.6}px`;
+                gameScreen.style.height = `${availableHeight}px`;
                 
+                // Adjust numpad width to fit screen
+                numpad.style.width = `${window.innerWidth - 20}px`; // 20px for margins
                 numpad.style.display = 'grid';
-                numpad.style.position = 'fixed';
-                numpad.style.bottom = '0';
-                numpad.style.left = '0';
-                numpad.style.right = '0';
-                numpad.style.padding = '5px';
                 
+                // Rearrange elements for mobile layout
+                gameScreen.innerHTML = '';
+                gameScreen.appendChild(gameBoard);
+                gameScreen.appendChild(equationContainer);
+                gameScreen.appendChild(scoreTimer);
+                gameScreen.appendChild(numpad);
+
                 // Disable keyboard input for mobile
                 answerInput.readOnly = true;
             } else {
                 // Desktop layout
+                gameBoard.style.height = '';
                 gameScreen.style.height = '';
-                gameScreen.style.display = 'block';
-                gameBoard.style.flex = '';
                 numpad.style.display = 'none';
                 
                 // Enable keyboard input for desktop
