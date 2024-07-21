@@ -134,13 +134,13 @@
                 padding: 10px;
             }
             #game-board {
-                flex: 1;
-                margin: 0 0 10px 0;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 5px;
                 max-width: 100%;
             }
             .card {
-                font-size: 16px;
-                min-height: 45px;
+                font-size: 15px;
+                min-height: 40px;
             }
             #equation-container, #score-timer {
                 font-size: 16px;
@@ -282,12 +282,11 @@
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.number = number;
-    // 카드 텍스트를 비워둡니다.
     card.textContent = '';
     if (uploadedImage) {
         card.style.backgroundImage = `url(${uploadedImage})`;
-        card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
-        card.style.backgroundSize = '400% 500%';
+        card.style.backgroundPosition = `${(index % 5) * 25}% ${Math.floor(index / 5) * 20}%`; // 5x4 그리드로 변경
+        card.style.backgroundSize = '500% 400%'; // 5x4 그리드에 맞게 조정
     }
     card.addEventListener('click', () => flipCard(card, index));
     gameBoard.appendChild(card);
@@ -455,17 +454,28 @@
         const numpadHeight = numpad.offsetHeight;
         const availableHeight = screenHeight - numpadHeight - 20; // 20px for margins
         
-        gameBoard.style.height = `${availableHeight * 0.6}px`;
+        gameBoard.style.height = `${availableHeight * 0.5}px`; // 카드 영역 높이를 줄임
         gameScreen.style.height = `${availableHeight}px`;
         
         // Adjust numpad width to fit screen
         numpad.style.width = `${window.innerWidth - 20}px`; // 20px for margins
         numpad.style.display = 'grid';
         
-        // Rearrange elements for mobile layout without clearing the content
+        // Rearrange elements for mobile layout
+        gameScreen.innerHTML = ''; // Clear existing content
         gameScreen.appendChild(gameBoard);
+        
+        const spacer = document.createElement('div');
+        spacer.style.height = '20px'; // 간격 추가
+        gameScreen.appendChild(spacer);
+        
         gameScreen.appendChild(equationContainer);
         gameScreen.appendChild(scoreTimer);
+        
+        const praiseSpacer = document.createElement('div');
+        praiseSpacer.style.height = '15px'; // 칭찬 메시지 위의 간격
+        gameScreen.appendChild(praiseSpacer);
+        
         gameScreen.appendChild(praise);
         gameScreen.appendChild(incorrectMessage);
         gameScreen.appendChild(bonusTime);
