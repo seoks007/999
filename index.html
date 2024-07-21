@@ -64,7 +64,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 10px 0;
+            margin: 20px 0 10px;
         }
         #equation, #answer-input, #submit-answer {
             font-size: 18px;
@@ -141,30 +141,16 @@
                 gap: 5px;
             }
             .card {
-                font-size: 16px;
-                min-height: 50px;
+                font-size: 14px;
+                min-height: 40px;
             }
             #equation-container {
                 flex-wrap: wrap;
                 justify-content: center;
+                margin-top: 15px;
             }
             #equation-container > * {
                 margin: 5px;
-            }
-            #score-timer {
-                flex-direction: column;
-                align-items: center;
-            }
-            #score-timer > * {
-                margin: 5px 0;
-            }
-            #numpad {
-                display: grid;
-                position: fixed;
-                bottom: 10px;
-                left: 10px;
-                right: 10px;
-                max-width: none;
             }
             #answer-input {
                 pointer-events: none;
@@ -266,7 +252,7 @@
             timeLeft = 60;
             bonusTime = false;
             document.getElementById('setup').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('game-screen').style.display = 'flex';
             const gameBoard = document.getElementById('game-board');
             gameBoard.innerHTML = '';
             document.getElementById('score').textContent = '점수: 0';
@@ -385,7 +371,7 @@
             const gameBoard = document.getElementById('game-board');
             const cardElements = Array.from(gameBoard.children);
             cardElements.forEach((card, index) => {
-               card.dataset.number = cards[index];
+                card.dataset.number = cards[index];
                 if (uploadedImage) {
                     card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
                 }
@@ -455,9 +441,6 @@
             const numpad = document.getElementById('numpad');
             const equationContainer = document.getElementById('equation-container');
             const scoreTimer = document.getElementById('score-timer');
-            const praise = document.getElementById('praise');
-            const incorrectMessage = document.getElementById('incorrect-message');
-            const bonusTime = document.getElementById('bonus-time');
             
             if (isMobile) {
                 const screenHeight = window.innerHeight;
@@ -476,15 +459,6 @@
                 gameScreen.style.flexDirection = 'column';
                 gameScreen.style.justifyContent = 'space-between';
                 
-                gameScreen.innerHTML = '';
-                gameScreen.appendChild(gameBoard);
-                gameScreen.appendChild(equationContainer);
-                gameScreen.appendChild(scoreTimer);
-                gameScreen.appendChild(praise);
-                gameScreen.appendChild(incorrectMessage);
-                gameScreen.appendChild(bonusTime);
-                gameScreen.appendChild(numpad);
-
                 // Disable keyboard input for mobile
                 answerInput.readOnly = true;
             } else {
@@ -493,14 +467,6 @@
                 gameScreen.style.height = '';
                 gameScreen.style.display = 'block';
                 numpad.style.display = 'none';
-                
-                gameScreen.innerHTML = '';
-                gameScreen.appendChild(gameBoard);
-                gameScreen.appendChild(equationContainer);
-                gameScreen.appendChild(scoreTimer);
-                gameScreen.appendChild(praise);
-                gameScreen.appendChild(incorrectMessage);
-                gameScreen.appendChild(bonusTime);
                 
                 // Enable keyboard input for desktop
                 answerInput.readOnly = false;
