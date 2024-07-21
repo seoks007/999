@@ -96,8 +96,8 @@
             margin: 10px auto;
         }
         .numpad-btn {
-            font-size: 18px;
-            padding: 10px;
+            font-size: 24px;
+            padding: 15px;
             width: 100%;
         }
         .ranking-item {
@@ -129,31 +129,45 @@
             #game-screen {
                 display: flex;
                 flex-direction: column;
-                height: 100%;
+                height: 100vh;
                 margin: 0;
                 padding: 10px;
             }
             #game-board {
                 flex: 1;
-                margin: 0 0 10px 0;
+                margin: 0 0 15px 0;
                 max-width: 100%;
                 grid-template-columns: repeat(4, 1fr);
-                gap: 5px;
+                gap: 3px;
             }
             .card {
                 font-size: 14px;
-                min-height: 40px;
+                min-height: 35px;
             }
             #equation-container {
                 flex-wrap: wrap;
                 justify-content: center;
-                margin-top: 15px;
+                margin: 15px 0;
             }
             #equation-container > * {
                 margin: 5px;
             }
             #answer-input {
                 pointer-events: none;
+            }
+            #numpad {
+                display: grid;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                max-width: none;
+                margin: 0;
+                padding: 5px;
+            }
+            .numpad-btn {
+                font-size: 24px;
+                padding: 15px 0;
             }
         }
     </style>
@@ -443,29 +457,27 @@
             const scoreTimer = document.getElementById('score-timer');
             
             if (isMobile) {
-                const screenHeight = window.innerHeight;
-                const numpadHeight = 200; // 예상 numpad 높이
-                const availableHeight = screenHeight - numpadHeight;
-                
-                gameBoard.style.height = `${availableHeight * 0.6}px`;
-                gameScreen.style.height = `${availableHeight}px`;
-                
-                // Adjust numpad width to fit screen
-                numpad.style.width = `${window.innerWidth - 20}px`; // 20px for margins
-                numpad.style.display = 'grid';
-                
-                // Rearrange elements for mobile layout
+                gameScreen.style.height = '100vh';
                 gameScreen.style.display = 'flex';
                 gameScreen.style.flexDirection = 'column';
                 gameScreen.style.justifyContent = 'space-between';
+                
+                gameBoard.style.flex = '1';
+                
+                numpad.style.display = 'grid';
+                numpad.style.position = 'fixed';
+                numpad.style.bottom = '0';
+                numpad.style.left = '0';
+                numpad.style.right = '0';
+                numpad.style.padding = '5px';
                 
                 // Disable keyboard input for mobile
                 answerInput.readOnly = true;
             } else {
                 // Desktop layout
-                gameBoard.style.height = '';
                 gameScreen.style.height = '';
                 gameScreen.style.display = 'block';
+                gameBoard.style.flex = '';
                 numpad.style.display = 'none';
                 
                 // Enable keyboard input for desktop
