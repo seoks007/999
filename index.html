@@ -108,6 +108,16 @@
             height: 30px;
             margin-right: 10px;
         }
+        #score-timer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        #score {
+            color: red;
+            font-weight: bold;
+        }
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -127,7 +137,7 @@
             .card {
                 font-size: 18px;
             }
-            #equation-container, #score, #timer {
+            #equation-container, #score-timer {
                 font-size: 14px;
                 margin: 5px 0;
             }
@@ -171,8 +181,10 @@
             <input type="number" id="answer-input" placeholder="답">
             <button id="submit-answer">제출</button>
         </div>
-        <div id="score">점수: 0</div>
-        <div id="timer">남은 시간: 60초</div>
+        <div id="score-timer">
+            <div id="score">점수: 0</div>
+            <div id="timer">남은 시간: 60초</div>
+        </div>
         <div id="bonus-time" style="display:none;">보너스 구간! (점수 x2)</div>
         <div id="incorrect-message"></div>
         <div id="numpad">
@@ -375,7 +387,7 @@
                 });
             }
             
-           if (timeLeft <= 0) {
+            if (timeLeft <= 0) {
                 clearInterval(gameInterval);
                 const name = document.getElementById('name-input').value.trim();
                 rankings.push({name: name, score: score});
@@ -421,15 +433,13 @@
         function adjustMobileLayout() {
             const isMobile = window.innerWidth <= 768;
             const answerInput = document.getElementById('answer-input');
+            const gameScreen = document.getElementById('game-screen');
+            const gameBoard = document.getElementById('game-board');
+            const numpad = document.getElementById('numpad');
+            const equationContainer = document.getElementById('equation-container');
+            const scoreTimer = document.getElementById('score-timer');
             
             if (isMobile) {
-                const gameScreen = document.getElementById('game-screen');
-                const gameBoard = document.getElementById('game-board');
-                const numpad = document.getElementById('numpad');
-                const equationContainer = document.getElementById('equation-container');
-                const scoreElement = document.getElementById('score');
-                const timerElement = document.getElementById('timer');
-                
                 const screenHeight = window.innerHeight;
                 const numpadHeight = numpad.offsetHeight;
                 const availableHeight = screenHeight - numpadHeight - 20; // 20px for margins
@@ -445,14 +455,15 @@
                 gameScreen.innerHTML = '';
                 gameScreen.appendChild(gameBoard);
                 gameScreen.appendChild(equationContainer);
-                gameScreen.appendChild(scoreElement);
-                gameScreen.appendChild(timerElement);
+                gameScreen.appendChild(scoreTimer);
                 gameScreen.appendChild(numpad);
 
                 // Disable keyboard input for mobile
                 answerInput.readOnly = true;
             } else {
-                document.getElementById('numpad').style.display = 'none';
+                gameBoard.style.height = '';
+                gameScreen.style.height = '';
+                numpad.style.display = 'none';
                 // Enable keyboard input for desktop
                 answerInput.readOnly = false;
             }
