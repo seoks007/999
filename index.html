@@ -210,6 +210,7 @@
 
     <audio id="applause-sound" src="https://www.soundjay.com/human/applause-01.mp3"></audio>
     <audio id="cheer-sound" src="https://www.soundjay.com/human/cheering-3.mp3"></audio>
+    <audio id="background-music" loop></audio>
 
     <script>
         let cards = [];
@@ -222,6 +223,15 @@
         let consecutiveCorrect = 0;
         let bonusTime = false;
         let uploadedImage = null;
+        const backgroundMusic = document.getElementById('background-music');
+
+        const musicFiles = [
+            'https://github.com/seoks007/game-music1/raw/main/1.mp3',
+            'https://github.com/seoks007/game-music1/raw/main/2.mp3',
+            'https://github.com/seoks007/game-music1/raw/main/3.mp3',
+            'https://github.com/seoks007/game-music1/raw/main/4.mp3',
+            'https://github.com/seoks007/game-music1/raw/main/5.mp3'
+        ];
 
         const praises = [
             "훌륭해요!", "대단해요!", "멋져요!", "완벽해요!", "놀라워요!",
@@ -238,6 +248,18 @@
 
         const applauseSound = document.getElementById('applause-sound');
         const cheerSound = document.getElementById('cheer-sound');
+
+        function playBackgroundMusic() {
+            const randomIndex = Math.floor(Math.random() * musicFiles.length);
+            const selectedMusic = musicFiles[randomIndex];
+            backgroundMusic.src = selectedMusic;
+            backgroundMusic.play().catch(e => console.log("Audio play failed:", e));
+        }
+
+        function stopBackgroundMusic() {
+            backgroundMusic.pause();
+            backgroundMusic.currentTime = 0;
+        }
 
         function startGame() {
             const name = document.getElementById('name-input').value.trim();
@@ -279,37 +301,39 @@
             shuffleArray(cards);
 
             cards.forEach((number, index) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.dataset.number = number;
-    card.textContent = '';
-    if (uploadedImage) {
-        card.style.backgroundImage = `url(${uploadedImage})`;
-        card.style.backgroundPosition = `${(index % 5) * 25}% ${Math.floor(index / 5) * 20}%`; // 5x4 그리드로 변경
-        card.style.backgroundSize = '500% 400%'; // 5x4 그리드에 맞게 조정
-    }
-    card.addEventListener('click', () => flipCard(card, index));
-    gameBoard.appendChild(card);
-});
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.number = number;
+                card.textContent = '';
+                if (uploadedImage) {
+                    card.style.backgroundImage = `url(${uploadedImage})`;
+                    card.style.backgroundPosition = `${(index % 5) * 25}% ${Math.floor(index / 5) * 20}%`;
+                    card.style.backgroundSize = '500% 400%';
+                }
+                card.addEventListener('click', () => flipCard(card, index));
+                gameBoard.appendChild(card);
+            });
 
             clearInterval(gameInterval);
             gameInterval = setInterval(updateTimer, 1000);
+            
+            playBackgroundMusic();
             
             adjustMobileLayout();
         }
 
         function flipCard(card, index) {
-    if (selectedCards.length < 2 && !selectedCards.includes(index) && !card.classList.contains('flipped')) {
-        card.textContent = card.dataset.number;
-        card.classList.add('flipped');
-        selectedCards.push(index);
+            if (selectedCards.length < 2 && !selectedCards.includes(index) && !card.classList.contains('flipped')) {
+                card.textContent = card.dataset.number;
+                card.classList.add('flipped');
+                selectedCards.push(index);
 
-        if (selectedCards.length === 2) {
-            updateEquation();
-            document.getElementById('answer-input').focus();
+                if (selectedCards.length === 2) {
+                    updateEquation();
+                    document.getElementById('answer-input').focus();
+                }
+            }
         }
-    }
-}
 
         function updateEquation() {
             const card1 = document.getElementsByClassName('card')[selectedCards[0]];
@@ -320,67 +344,66 @@
         }
 
         function checkAnswer() {
-    if (selectedCards.length !== 2) return;
+            if (selectedCards.length !== 2) return;
 
-    const card1 = document.getElementsByClassName('card')[selectedCards[0]];
-    const card2 = document.getElementsByClassName('card')[selectedCards[1]];
-    const userAnswer = parseInt(document.getElementById('answer-input').value);
-    const correctSum = parseInt(card1.dataset.number) + parseInt(card2.dataset.number);
+            const card1 = document.getElementsByClassName('card')[selectedCards[0]];
+            const card2 = document.getElementsByClassName('card')[selectedCards[1]];
+            const userAnswer = parseInt(document.getElementById('answer-input').value);
+            const correctSum = parseInt(card1.dataset.number) + parseInt(card2.dataset.number);
 
-    if (userAnswer === correctSum) {
-        consecutiveCorrect++;
-        let pointsEarned = bonusTime ? 2 : 1;
-        score += pointsEarned;
+            if (userAnswer === correctSum) {
+                consecutiveCorrect++;
+                let pointsEarned = bonusTime ? 2 : 1;
+                score += pointsEarned;
 
-        const praise = praises[Math.floor(Math.random() * praises.length)];
-        document.getElementById('praise').innerHTML = `${praise} +${pointsEarned}점`;
-        document.getElementById('incorrect-message').textContent = '';
+                const praise = praises[Math.floor(Math.random() * praises.length)];
+                document.getElementById('praise').innerHTML = `${praise} +${pointsEarned}점`;
+                document.getElementById('incorrect-message').textContent = '';
 
-        if (consecutiveCorrect % 2 === 0) {
-            const bonus = consecutiveCorrect;
-            score += bonus;
-            document.getElementById('praise').innerHTML += `<br>연속 정답 ${consecutiveCorrect}회 +${bonus}점`;
-        }
-
-        if (score % 10 === 0) {
-            if (score % 20 === 0) {
-                cheerSound.play().catch(e => console.log("Audio play failed:", e));
+                if (consecutiveCorrect % 2 === 0) {
+                    const bonus = consecutiveCorrect;
+                    score += bonus;
+                    document.getElementById('praise').innerHTML += `<br>연속 정답 ${consecutiveCorrect}회 +${bonus}점`;
+                }
+				if (score % 10 === 0) {
+                    if (score % 20 === 0) {
+                        cheerSound.play().catch(e => console.log("Audio play failed:", e));
+                    } else {
+                        applauseSound.play().catch(e => console.log("Audio play failed:", e));
+                    }
+                }
             } else {
-                applauseSound.play().catch(e => console.log("Audio play failed:", e));
+                score = Math.max(0, score - 1);
+                consecutiveCorrect = 0;
+                const incorrectMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
+                document.getElementById('incorrect-message').textContent = `${incorrectMessage} -1점`;
+                document.getElementById('praise').textContent = '';
             }
+
+            document.getElementById('score').textContent = `점수: ${score}`;
+            document.getElementById('answer-input').value = '';
+
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+            card1.textContent = '';
+            card2.textContent = '';
+
+            selectedCards = [];
+            shuffleArray(cards);
+            updateCardPositions();
         }
-    } else {
-        score = Math.max(0, score - 1);
-        consecutiveCorrect = 0;
-        const incorrectMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
-        document.getElementById('incorrect-message').textContent = `${incorrectMessage} -1점`;
-        document.getElementById('praise').textContent = '';
-    }
-
-    document.getElementById('score').textContent = `점수: ${score}`;
-    document.getElementById('answer-input').value = '';
-
-    card1.classList.remove('flipped');
-    card2.classList.remove('flipped');
-    card1.textContent = '';
-    card2.textContent = '';
-
-    selectedCards = [];
-    shuffleArray(cards);
-    updateCardPositions();
-}
 
         function updateCardPositions() {
-    const gameBoard = document.getElementById('game-board');
-    const cardElements = Array.from(gameBoard.children);
-    cardElements.forEach((card, index) => {
-        card.dataset.number = cards[index];
-        card.textContent = ''; // 카드 텍스트를 비웁니다.
-        if (uploadedImage) {
-            card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
+            const gameBoard = document.getElementById('game-board');
+            const cardElements = Array.from(gameBoard.children);
+            cardElements.forEach((card, index) => {
+                card.dataset.number = cards[index];
+                card.textContent = '';
+                if (uploadedImage) {
+                    card.style.backgroundPosition = `${(index % 5) * 25}% ${Math.floor(index / 5) * 20}%`;
+                }
+            });
         }
-    });
-}
 
         function updateTimer() {
             timeLeft--;
@@ -396,6 +419,7 @@
             
             if (timeLeft <= 0) {
                 clearInterval(gameInterval);
+                stopBackgroundMusic();
                 const name = document.getElementById('name-input').value.trim();
                 rankings.push({name: name, score: score});
                 rankings.sort((a, b) => b.score - a.score);
@@ -438,61 +462,56 @@
         }
 
         function adjustMobileLayout() {
-    const isMobile = window.innerWidth <= 768;
-    const answerInput = document.getElementById('answer-input');
-    const gameScreen = document.getElementById('game-screen');
-    const gameBoard = document.getElementById('game-board');
-    const numpad = document.getElementById('numpad');
-    const equationContainer = document.getElementById('equation-container');
-    const scoreTimer = document.getElementById('score-timer');
-    const praise = document.getElementById('praise');
-    const incorrectMessage = document.getElementById('incorrect-message');
-    const bonusTime = document.getElementById('bonus-time');
-    
-    if (isMobile) {
-        const screenHeight = window.innerHeight;
-        const numpadHeight = numpad.offsetHeight;
-        const availableHeight = screenHeight - numpadHeight - 20; // 20px for margins
-        
-        gameBoard.style.height = `${availableHeight * 0.5}px`; // 카드 영역 높이를 줄임
-        gameScreen.style.height = `${availableHeight}px`;
-        
-        // Adjust numpad width to fit screen
-        numpad.style.width = `${window.innerWidth - 20}px`; // 20px for margins
-        numpad.style.display = 'grid';
-        
-        // Rearrange elements for mobile layout
-        gameScreen.innerHTML = ''; // Clear existing content
-        gameScreen.appendChild(gameBoard);
-        
-        const spacer = document.createElement('div');
-        spacer.style.height = '20px'; // 간격 추가
-        gameScreen.appendChild(spacer);
-        
-        gameScreen.appendChild(equationContainer);
-        gameScreen.appendChild(scoreTimer);
-        
-        const praiseSpacer = document.createElement('div');
-        praiseSpacer.style.height = '15px'; // 칭찬 메시지 위의 간격
-        gameScreen.appendChild(praiseSpacer);
-        
-        gameScreen.appendChild(praise);
-        gameScreen.appendChild(incorrectMessage);
-        gameScreen.appendChild(bonusTime);
-        gameScreen.appendChild(numpad);
+            const isMobile = window.innerWidth <= 768;
+            const answerInput = document.getElementById('answer-input');
+            const gameScreen = document.getElementById('game-screen');
+            const gameBoard = document.getElementById('game-board');
+            const numpad = document.getElementById('numpad');
+            const equationContainer = document.getElementById('equation-container');
+            const scoreTimer = document.getElementById('score-timer');
+            const praise = document.getElementById('praise');
+            const incorrectMessage = document.getElementById('incorrect-message');
+            const bonusTime = document.getElementById('bonus-time');
+            
+            if (isMobile) {
+                const screenHeight = window.innerHeight;
+                const numpadHeight = numpad.offsetHeight;
+                const availableHeight = screenHeight - numpadHeight - 20;
+                
+                gameBoard.style.height = `${availableHeight * 0.5}px`;
+                gameScreen.style.height = `${availableHeight}px`;
+                
+                numpad.style.width = `${window.innerWidth - 20}px`;
+                numpad.style.display = 'grid';
+                
+                gameScreen.innerHTML = '';
+                gameScreen.appendChild(gameBoard);
+                
+                const spacer = document.createElement('div');
+                spacer.style.height = '20px';
+                gameScreen.appendChild(spacer);
+                
+                gameScreen.appendChild(equationContainer);
+                gameScreen.appendChild(scoreTimer);
+                
+                const praiseSpacer = document.createElement('div');
+                praiseSpacer.style.height = '15px';
+                gameScreen.appendChild(praiseSpacer);
+                
+                gameScreen.appendChild(praise);
+                gameScreen.appendChild(incorrectMessage);
+                gameScreen.appendChild(bonusTime);
+                gameScreen.appendChild(numpad);
 
-        // Disable keyboard input for mobile
-        answerInput.readOnly = true;
-    } else {
-        // Desktop layout
-        gameBoard.style.height = '';
-        gameScreen.style.height = '';
-        numpad.style.display = 'none';
-        
-        // Enable keyboard input for desktop
-        answerInput.readOnly = false;
-    }
-}
+                answerInput.readOnly = true;
+            } else {
+                gameBoard.style.height = '';
+                gameScreen.style.height = '';
+                numpad.style.display = 'none';
+                
+                answerInput.readOnly = false;
+            }
+        }
 
         document.getElementById('start-game').addEventListener('click', startGame);
         document.getElementById('submit-answer').addEventListener('click', checkAnswer);
