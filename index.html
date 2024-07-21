@@ -279,17 +279,19 @@
             shuffleArray(cards);
 
             cards.forEach((number, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.dataset.number = number;
-                if (uploadedImage) {
-                    card.style.backgroundImage = `url(${uploadedImage})`;
-                    card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
-                    card.style.backgroundSize = '400% 500%';
-                }
-                card.addEventListener('click', () => flipCard(card, index));
-                gameBoard.appendChild(card);
-            });
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.number = number;
+    // 카드 텍스트를 비워둡니다.
+    card.textContent = '';
+    if (uploadedImage) {
+        card.style.backgroundImage = `url(${uploadedImage})`;
+        card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
+        card.style.backgroundSize = '400% 500%';
+    }
+    card.addEventListener('click', () => flipCard(card, index));
+    gameBoard.appendChild(card);
+});
 
             clearInterval(gameInterval);
             gameInterval = setInterval(updateTimer, 1000);
@@ -298,17 +300,17 @@
         }
 
         function flipCard(card, index) {
-            if (selectedCards.length < 2 && !selectedCards.includes(index) && !card.classList.contains('flipped')) {
-                card.textContent = card.dataset.number;
-                card.classList.add('flipped');
-                selectedCards.push(index);
+    if (selectedCards.length < 2 && !selectedCards.includes(index) && !card.classList.contains('flipped')) {
+        card.textContent = card.dataset.number;
+        card.classList.add('flipped');
+        selectedCards.push(index);
 
-                if (selectedCards.length === 2) {
-                    updateEquation();
-                    document.getElementById('answer-input').focus();
-                }
-            }
+        if (selectedCards.length === 2) {
+            updateEquation();
+            document.getElementById('answer-input').focus();
         }
+    }
+}
 
         function updateEquation() {
             const card1 = document.getElementsByClassName('card')[selectedCards[0]];
@@ -319,66 +321,67 @@
         }
 
         function checkAnswer() {
-            if (selectedCards.length !== 2) return;
+    if (selectedCards.length !== 2) return;
 
-            const card1 = document.getElementsByClassName('card')[selectedCards[0]];
-            const card2 = document.getElementsByClassName('card')[selectedCards[1]];
-            const userAnswer = parseInt(document.getElementById('answer-input').value);
-            const correctSum = parseInt(card1.dataset.number) + parseInt(card2.dataset.number);
+    const card1 = document.getElementsByClassName('card')[selectedCards[0]];
+    const card2 = document.getElementsByClassName('card')[selectedCards[1]];
+    const userAnswer = parseInt(document.getElementById('answer-input').value);
+    const correctSum = parseInt(card1.dataset.number) + parseInt(card2.dataset.number);
 
-            if (userAnswer === correctSum) {
-                consecutiveCorrect++;
-                let pointsEarned = bonusTime ? 2 : 1;
-                score += pointsEarned;
+    if (userAnswer === correctSum) {
+        consecutiveCorrect++;
+        let pointsEarned = bonusTime ? 2 : 1;
+        score += pointsEarned;
 
-                const praise = praises[Math.floor(Math.random() * praises.length)];
-                document.getElementById('praise').innerHTML = `${praise} +${pointsEarned}점`;
-                document.getElementById('incorrect-message').textContent = '';
+        const praise = praises[Math.floor(Math.random() * praises.length)];
+        document.getElementById('praise').innerHTML = `${praise} +${pointsEarned}점`;
+        document.getElementById('incorrect-message').textContent = '';
 
-                if (consecutiveCorrect % 2 === 0) {
-                    const bonus = consecutiveCorrect;
-                    score += bonus;
-                    document.getElementById('praise').innerHTML += `<br>연속 정답 ${consecutiveCorrect}회 +${bonus}점`;
-                }
-
-                if (score % 10 === 0) {
-                    if (score % 20 === 0) {
-                        cheerSound.play().catch(e => console.log("Audio play failed:", e));
-                    } else {
-                        applauseSound.play().catch(e => console.log("Audio play failed:", e));
-                    }
-                }
-            } else {
-                score = Math.max(0, score - 1);
-                consecutiveCorrect = 0;
-                const incorrectMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
-                document.getElementById('incorrect-message').textContent = `${incorrectMessage} -1점`;
-                document.getElementById('praise').textContent = '';
-            }
-
-            document.getElementById('score').textContent = `점수: ${score}`;
-            document.getElementById('answer-input').value = '';
-
-            card1.classList.remove('flipped');
-            card2.classList.remove('flipped');
-            card1.textContent = '';
-            card2.textContent = '';
-
-            selectedCards = [];
-            shuffleArray(cards);
-            updateCardPositions();
+        if (consecutiveCorrect % 2 === 0) {
+            const bonus = consecutiveCorrect;
+            score += bonus;
+            document.getElementById('praise').innerHTML += `<br>연속 정답 ${consecutiveCorrect}회 +${bonus}점`;
         }
+
+        if (score % 10 === 0) {
+            if (score % 20 === 0) {
+                cheerSound.play().catch(e => console.log("Audio play failed:", e));
+            } else {
+                applauseSound.play().catch(e => console.log("Audio play failed:", e));
+            }
+        }
+    } else {
+        score = Math.max(0, score - 1);
+        consecutiveCorrect = 0;
+        const incorrectMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
+        document.getElementById('incorrect-message').textContent = `${incorrectMessage} -1점`;
+        document.getElementById('praise').textContent = '';
+    }
+
+    document.getElementById('score').textContent = `점수: ${score}`;
+    document.getElementById('answer-input').value = '';
+
+    card1.classList.remove('flipped');
+    card2.classList.remove('flipped');
+    card1.textContent = '';
+    card2.textContent = '';
+
+    selectedCards = [];
+    shuffleArray(cards);
+    updateCardPositions();
+}
 
         function updateCardPositions() {
-            const gameBoard = document.getElementById('game-board');
-            const cardElements = Array.from(gameBoard.children);
-            cardElements.forEach((card, index) => {
-                card.dataset.number = cards[index];
-                if (uploadedImage) {
-                    card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
-                }
-            });
+    const gameBoard = document.getElementById('game-board');
+    const cardElements = Array.from(gameBoard.children);
+    cardElements.forEach((card, index) => {
+        card.dataset.number = cards[index];
+        card.textContent = ''; // 카드 텍스트를 비웁니다.
+        if (uploadedImage) {
+            card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
         }
+    });
+}
 
         function updateTimer() {
             timeLeft--;
