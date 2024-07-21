@@ -38,7 +38,8 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin: 20px auto;
-            max-width: 400px;
+            max-width: 500px;
+            width: 100%;
         }
         .card {
             aspect-ratio: 1;
@@ -53,6 +54,7 @@
             font-weight: bold;
             background-size: cover;
             background-position: center;
+            min-height: 80px;
         }
         .card.flipped {
             background-image: none !important;
@@ -113,6 +115,7 @@
             justify-content: space-between;
             align-items: center;
             margin: 10px 0;
+            font-size: 18px;
         }
         #score {
             color: red;
@@ -133,12 +136,14 @@
             #game-board {
                 flex: 1;
                 margin: 0 0 10px 0;
+                max-width: 100%;
             }
             .card {
                 font-size: 18px;
+                min-height: 60px;
             }
             #equation-container, #score-timer {
-                font-size: 14px;
+                font-size: 16px;
                 margin: 5px 0;
             }
             #numpad {
@@ -375,7 +380,7 @@
             });
         }
 
-        function updateTimer() {
+       function updateTimer() {
             timeLeft--;
             document.getElementById('timer').textContent = `남은 시간: ${timeLeft}초`;
             
@@ -461,9 +466,11 @@
                 // Disable keyboard input for mobile
                 answerInput.readOnly = true;
             } else {
+                // Desktop layout
                 gameBoard.style.height = '';
                 gameScreen.style.height = '';
                 numpad.style.display = 'none';
+                
                 // Enable keyboard input for desktop
                 answerInput.readOnly = false;
             }
