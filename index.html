@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>덧셈 카드 게임</title>
+    <title>숫자 카드 뒤집기 게임</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -105,6 +105,13 @@
             #game-board {
                 flex: 6;
             }
+            #equation-container, #score, #timer {
+                flex: 1;
+            }
+            #numpad {
+                display: grid;
+                flex: 3;
+            }
         }
     </style>
 </head>
@@ -159,7 +166,6 @@
 
     <audio id="applause-sound" src="https://www.soundjay.com/human/applause-01.mp3"></audio>
     <audio id="cheer-sound" src="https://www.soundjay.com/human/cheering-3.mp3"></audio>
-    <audio id="background-music" loop></audio>
 
     <script>
         let cards = [];
@@ -173,6 +179,9 @@
         let bonusTime = false;
         let uploadedImage = null;
         let audioEnabled = false;
+        let audioContext;
+        let audioBuffer;
+        let audioSource;
 
         const praises = [
             "훌륭해요!", "대단해요!", "멋져요!", "완벽해요!", "놀라워요!",
@@ -181,24 +190,40 @@
             "끝내주는데요?", "당신은 천재!", "놀라운 실력이에요!", "대단한 두뇌예요!", "박수 쳐 드려요!"
         ];
 
-        const backgroundMusicLinks = [
-            "https://drive.google.com/uc?export=download&id=1QyYnSoyddG7wBrEYZl1BoKS7MO5HaKJK",
-            "https://drive.google.com/uc?export=download&id=1lSLscRfnvcvSCTXlXun9zbGeHBPf28_d",
-            "https://drive.google.com/uc?export=download&id=1gDtXKox-KRBjR61zbELRmFqbsk5qD8OK",
+        const backgroundMusicList = [
+            "https://drive.google.com/uc?export=download&id=1hyLZhL5n-x51ZZ0GTYHE0dkE75fBG8Qr",
             "https://drive.google.com/uc?export=download&id=14RToKdmhNe9Bd7TFlzHiJpuDaBzNL2c9",
-            "https://drive.google.com/uc?export=download&id=1hyLZhL5n-x51ZZ0GTYHE0dkE75fBG8Qr"
+            "https://drive.google.com/uc?export=download&id=1gDtXKox-KRBjR61zbELRmFqbsk5qD8OK",
+            "https://drive.google.com/uc?export=download&id=1lSLscRfnvcvSCTXlXun9zbGeHBPf28_d",
+            "https://drive.google.com/uc?export=download&id=1QyYnSoyddG7wBrEYZl1BoKS7MO5HaKJK"
         ];
 
         let applauseSound = document.getElementById('applause-sound');
         let cheerSound = document.getElementById('cheer-sound');
-        let backgroundMusic = document.getElementById('background-music');
 
-        function playRandomBackgroundMusic() {
+        async function playRandomBackgroundMusic() {
             if (!audioEnabled) return;
 
-            const randomIndex = Math.floor(Math.random() * backgroundMusicLinks.length);
-            backgroundMusic.src = backgroundMusicLinks[randomIndex];
-            backgroundMusic.play().catch(e => console.log("Audio play failed:", e));
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (!audioBuffer) {
+                const randomIndex = Math.floor(Math.random() * backgroundMusicList.length);
+                const response = await fetch(backgroundMusicList[randomIndex]);
+                const arrayBuffer = await response.arrayBuffer();
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            }
+
+            if (audioSource) {
+                audioSource.stop();
+            }
+
+            audioSource = audioContext.createBufferSource();
+            audioSource.buffer = audioBuffer;
+            audioSource.connect(audioContext.destination);
+            audioSource.loop = true;
+            audioSource.start();
         }
 
         function startGame() {
@@ -258,7 +283,7 @@
             gameInterval = setInterval(updateTimer, 1000);
 
             if (audioEnabled) {
-                playRandomBackgroundMusic();
+                playRandomBackgroundMusic().catch(e => console.log("Audio play failed:", e));
             }
         }
 
@@ -340,7 +365,7 @@
             cardElements.forEach((card, index) => {
                 card.dataset.number = cards[index];
                 if (uploadedImage) {
-                    card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
+                   card.style.backgroundPosition = `${(index % 4) * 33.33}% ${Math.floor(index / 4) * 25}%`;
                 }
             });
         }
@@ -359,7 +384,9 @@
             
             if (timeLeft <= 0) {
                 clearInterval(gameInterval);
-                backgroundMusic.pause();
+                if (audioSource) {
+                    audioSource.stop();
+                }
                 const name = document.getElementById('name-input').value.trim();
                 rankings.push({name: name, score: score});
                 rankings.sort((a, b) => b.score - a.score);
@@ -424,22 +451,29 @@
             audioEnabled = true;
             this.textContent = '음악이 켜졌습니다';
             this.disabled = true;
-            playRandomBackgroundMusic();
+            playRandomBackgroundMusic().catch(e => console.log("Audio play failed:", e));
         });
 
         document.getElementById('toggle-music').addEventListener('click', function() {
-            if (backgroundMusic.paused) {
-                backgroundMusic.play().catch(e => console.log("Audio play failed:", e));
+            if (!audioContext) return;
+
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
                 this.textContent = '음악 끄기';
-            } else {
-                backgroundMusic.pause();
+                audioEnabled = true;
+            } else if (audioContext.state === 'running') {
+                audioContext.suspend();
                 this.textContent = '음악 켜기';
+                audioEnabled = false;
             }
         });
 
-        // 페이지 로드 시 오디오 권한 요청 표시
+        // 페이지 로드 시 오디오 권한 요청 표시 및 오디오 프리로딩
         window.addEventListener('load', function() {
             document.getElementById('audio-permission').style.display = 'block';
+            // 오디오 프리로딩
+            const audio = new Audio();
+            audio.src = backgroundMusicList[0];
         });
     </script>
 </body>
